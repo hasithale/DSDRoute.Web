@@ -1,0 +1,95 @@
+@{
+    ViewData["Title"] = "User Dashboard";
+}
+
+@section Styles {
+    <style>
+        .action-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1) !important;
+        }
+        
+        .action-card .icon-circle {
+            transition: all 0.3s ease;
+        }
+        
+        .action-card:hover .icon-circle {
+            transform: scale(1.1);
+        }
+        
+        .modern-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+    </style>
+}
+
+<div class="fade-in-up">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="modern-card" style="background: #0a83a1; color: white; overflow: hidden; position: relative;">
+                <div class="modern-card-body" style="padding: 3rem 2rem;">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-5 fw-bold mb-3">
+                                <i class="fas fa-home me-3"></i>
+                                Welcome back, @User.Identity!.Name!
+                            </h1>
+                            <p class="lead mb-0 opacity-90">
+                                Your personal dashboard where you can access your account information and application features.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end d-none d-md-block">
+                            <i class="fas fa-chart-line" style="font-size: 6rem; opacity: 0.2;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="modern-card action-card h-100" style="border-left: 4px solid #28a745;">
+                <div class="modern-card-body text-center" style="padding: 3rem 2rem;">
+                    <div class="mb-4">
+                        <div class="icon-circle" style="width: 80px; height: 80px; background: linear-gradient(135deg, #28a745, #20c997); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);">
+                            <i class="fas fa-plus text-white" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-3" style="color: #28a745;">Create New Order</h3>
+                    <p class="text-muted mb-4">Start a new order for your customers and manage inventory efficiently</p>
+                    <a href="@Url.Action("Create", "Order")" class="modern-btn modern-btn-success btn-lg">
+                        <i class="fas fa-shopping-cart me-2"></i>Create Order
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="modern-card action-card h-100" style="border-left: 4px solid #007bff;">
+                <div class="modern-card-body text-center" style="padding: 3rem 2rem;">
+                    <div class="mb-4">
+                        <div class="icon-circle" style="width: 80px; height: 80px; background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);">
+                            <i class="fas fa-store text-white" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-3" style="color: #007bff;">Add New Shop</h3>
+                    <p class="text-muted mb-4">Register a new shop location to expand your business network</p>
+                    <a href="@Url.Action("Create", "Shop")" class="modern-btn modern-btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Add Shop
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

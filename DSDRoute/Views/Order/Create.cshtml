@@ -1,0 +1,790 @@
+@model DSDRoute.Models.ViewModels.CreateOrderViewModel
+@{
+    ViewData["Title"] = "Create New Order";
+}
+
+<!-- Custom CSS for Create Order Form -->
+<style>
+    .form-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+                       <button type="submit" class="btn btn-primary btn-lg w-100" style="background: #0a83a1; border: none; border-radius: 10px;">
+                        <i class="fas fa-save"></i> Create Order
+                    </button>  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        border-bottom: 2px solid rgba(0, 123, 255, 0.3);
+        padding-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .section-title i {
+        color: #007bff;
+    }
+    
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        color: #2c3e50;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background: rgba(255, 255, 255, 1);
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        color: #2c3e50;
+    }
+    
+    .form-control::placeholder {
+        color: rgba(44, 62, 80, 0.6);
+    }
+    
+    .form-label {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-add-item {
+        background: #0a83a1;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-add-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(10, 131, 161, 0.4);
+        background: #096d87;
+    }
+    
+    .btn-remove-item {
+        background: #dc3545;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .btn-remove-item:hover {
+        background: #c82333;
+        transform: translateY(-1px);
+    }
+    
+    .credit-amount {
+        color: #dc3545;
+        font-weight: bold;
+        font-size: 1.1rem;
+        background: rgba(220, 53, 69, 0.1);
+    }
+    
+    .auto-calc {
+        background: rgba(10, 131, 161, 0.1);
+        border-color: #0a83a1;
+        color: #0a83a1;
+        font-weight: 600;
+    }
+    
+    .item-row, .return-row {
+        background: rgba(0, 123, 255, 0.05);
+        border: 1px solid rgba(0, 123, 255, 0.2);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .item-row h6, .return-row h6 {
+        color: #2c3e50;
+    }
+    
+    .payment-summary {
+        background: rgba(40, 167, 69, 0.1);
+        border: 2px solid #28a745;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .summary-row:last-child {
+        border-bottom: none;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #28a745;
+    }
+    
+    .input-group-text {
+        background: rgba(0, 123, 255, 0.1);
+        border-color: rgba(0, 0, 0, 0.2);
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .text-danger {
+        color: #dc3545;
+        font-weight: 500;
+    }
+    
+    /* Main title styling */
+    h2.text-white {
+        color: #2c3e50 !important;
+        text-shadow: none;
+    }
+    
+    /* Override Bootstrap button styles for better visibility */
+    .btn-outline-light {
+        color: #2c3e50;
+        border-color: #2c3e50;
+        background: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+    }
+    
+    .btn-outline-light:hover {
+        color: white;
+        background-color: #2c3e50;
+        border-color: #2c3e50;
+    }
+    
+    /* Enhanced visibility for select options */
+    option {
+        color: #2c3e50;
+        background: white;
+    }
+    
+    /* Better contrast for validation messages */
+    .text-danger {
+        background: rgba(220, 53, 69, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-white">
+                    <i class="fas fa-plus-circle me-2"></i>Create New Order
+                </h2>
+                <a asp-action="Index" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form id="createOrderForm" method="post">
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-8">
+                
+                <!-- 1. Order Metadata -->
+                <div class="form-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-info-circle"></i>Order Metadata
+                    </h4>
+                    <p class="mb-3" style="color: #6c757d; font-size: 0.95rem; font-weight: 500;" id="currentDateTime">
+                        <!-- Date will be set by JavaScript -->
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Order No / Invoice No</label>
+                                <input asp-for="OrderNumber" class="form-control auto-calc" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Sales Rep</label>
+                                <input asp-for="SalesRepName" class="form-control auto-calc" readonly />
+                                <input asp-for="SalesRepId" type="hidden" />
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Hidden fields for date and time -->
+                    <input asp-for="OrderDate" type="hidden" />
+                    <input asp-for="OrderTime" type="hidden" />
+                </div>
+
+                <!-- 2. Customer (Shop) Details -->
+                <div class="form-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-store"></i>Customer (Shop) Details
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="ShopId" class="form-label">Shop</label>
+                                <select asp-for="ShopId" class="form-select" asp-items="Model.Shops" onchange="loadShopInfo(this.value)">
+                                    <option value="">-- Select Shop --</option>
+                                </select>
+                                <span asp-validation-for="ShopId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Contact No</label>
+                                <input id="contactNo" asp-for="ContactNo" class="form-control auto-calc" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Previous Credit Bills Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rs.</span>
+                                    <input id="previousCreditAmount" asp-for="PreviousCreditAmount" class="form-control credit-amount auto-calc" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label">Shop Address</label>
+                                <input id="shopAddress" class="form-control auto-calc" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Product List (Order Items) -->
+                <div class="form-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-shopping-cart"></i>Product List
+                        <button type="button" class="btn btn-add-item ms-auto" onclick="addOrderItem()">
+                            <i class="fas fa-plus"></i> Add Product
+                        </button>
+                    </h4>
+                    <div id="orderItemsContainer">
+                        <!-- Order items will be added here dynamically -->
+                    </div>
+                </div>
+
+                <!-- 4. Returned Items -->
+                <div class="form-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-undo"></i>Returned Items (if any)
+                        <button type="button" class="btn btn-add-item ms-auto" onclick="addReturnItem()">
+                            <i class="fas fa-plus"></i> Add Return
+                        </button>
+                    </h4>
+                    <div id="returnItemsContainer">
+                        <!-- Return items will be added here dynamically -->
+                    </div>
+                </div>
+
+                <!-- 6. Additional Info -->
+                <div class="form-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-clipboard"></i>Additional Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Notes" class="form-label"></label>
+                                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="e.g., Customer requested delivery tomorrow"></textarea>
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label asp-for="TaxPercentage" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="TaxPercentage" class="form-control" type="number" step="0.01" min="0" max="100" onchange="calculateTotals()" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <span asp-validation-for="TaxPercentage" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label asp-for="DeliveryDate" class="form-label"></label>
+                                <input asp-for="DeliveryDate" class="form-control" type="date" />
+                                <span asp-validation-for="DeliveryDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Payment Summary -->
+            <div class="col-md-4">
+                <div class="form-section payment-summary">
+                    <h4 class="section-title">
+                        <i class="fas fa-calculator"></i>Payment Details
+                    </h4>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>Rs. <span id="subtotalDisplay">0.00</span></span>
+                    </div>
+                    <input asp-for="Subtotal" type="hidden" />
+                    
+                    <div class="mb-3">
+                        <label asp-for="InvoiceDiscount" class="form-label">Invoice Discount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs.</span>
+                            <input asp-for="InvoiceDiscount" class="form-control" type="number" step="0.01" min="0" onchange="calculateTotals()" />
+                        </div>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Tax Amount:</span>
+                        <span>Rs. <span id="taxAmountDisplay">0.00</span></span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Previous Credit Amount:</span>
+                        <span class="credit-amount">Rs. <span id="previousCreditDisplay">0.00</span></span>
+                    </div>
+                    
+                    <div class="summary-row" style="color: #28a745; font-weight: 600;">
+                        <span><i class="fas fa-minus-circle me-1"></i>Return Items Credit:</span>
+                        <span>- Rs. <span id="totalReturnedDisplay">0.00</span></span>
+                    </div>
+                    <input asp-for="TotalReturned" type="hidden" />
+                    
+                    <hr style="border-color: #0a83a1; border-width: 2px;">
+                    
+                    <div class="summary-row">
+                        <strong>Net Total:</strong>
+                        <strong>Rs. <span id="netTotalDisplay">0.00</span></strong>
+                    </div>
+                    <input asp-for="NetTotal" type="hidden" />
+                    
+                    <small class="text-muted mt-2" style="font-size: 0.8rem;">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Calculation: Subtotal - Discount + Tax + Previous Credit - Return Items
+                    </small>
+                    
+                    <div class="mb-3 mt-3">
+                        <label asp-for="TodayPayment" class="form-label">Today's Payment</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs.</span>
+                            <input asp-for="TodayPayment" class="form-control" type="number" step="0.01" min="0" onchange="calculateTotals()" />
+                        </div>
+                        <span asp-validation-for="TodayPayment" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="PaymentMode" class="form-label">Payment Mode</label>
+                        <select asp-for="PaymentMode" class="form-select">
+                            <option value="0">Cash</option>
+                            <option value="1">Credit (Not Paid)</option>
+                            <option value="2">Card</option>
+                            <option value="3">Bank Transfer</option>
+                        </select>
+                        <span asp-validation-for="PaymentMode" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <strong>Outstanding Balance:</strong>
+                        <strong>Rs. <span id="outstandingDisplay">0.00</span></strong>
+                    </div>
+                    <input asp-for="OutstandingBalance" type="hidden" />
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px;">
+                        <i class="fas fa-save me-2"></i>Create Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Templates for dynamic items -->
+<div id="orderItemTemplate" style="display: none;">
+    <div class="item-row">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0" style="color: #2c3e50; font-weight: 600;">Product Item</h6>
+            <button type="button" class="btn btn-remove-item" onclick="removeOrderItem(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">Product</label>
+                <select name="OrderItems[INDEX].ProductId" class="form-select product-select" onchange="loadProductInfo(this, INDEX)">
+                    <option value="">-- Select Product --</option>
+                    @if (Model?.Products != null)
+                    {
+                        @foreach (var product in Model.Products)
+                        {
+                            <option value="@product.Value">@product.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Quantity</label>
+                <input name="OrderItems[INDEX].Quantity" type="number" class="form-control quantity-input" min="1" value="1" onchange="calculateItemTotal(this, INDEX)" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Unit Price</label>
+                <input name="OrderItems[INDEX].UnitPrice" type="number" class="form-control price-input" step="0.01" min="0" onchange="calculateItemTotal(this, INDEX)" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Discount</label>
+                <input name="OrderItems[INDEX].DiscountPerItem" type="number" class="form-control discount-input" step="0.01" min="0" value="0" onchange="calculateItemTotal(this, INDEX)" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Line Total</label>
+                <input name="OrderItems[INDEX].LineTotal" type="number" class="form-control auto-calc line-total" readonly />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="returnItemTemplate" style="display: none;">
+    <div class="return-row">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0" style="color: #2c3e50; font-weight: 600;">Return Item</h6>
+            <button type="button" class="btn btn-remove-item" onclick="removeReturnItem(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">Product</label>
+                <select name="ReturnItems[INDEX].ProductId" class="form-select return-product-select" onchange="loadReturnProductInfo(this, INDEX)">
+                    <option value="">-- Select Product --</option>
+                    @if (Model?.Products != null)
+                    {
+                        @foreach (var product in Model.Products)
+                        {
+                            <option value="@product.Value">@product.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Quantity</label>
+                <input name="ReturnItems[INDEX].Quantity" type="number" class="form-control return-quantity" min="1" value="1" onchange="updateReturnAmount(this, INDEX)" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Reason</label>
+                <select name="ReturnItems[INDEX].ReturnReason" class="form-select return-reason-select" onchange="toggleCustomReason(this, INDEX)">
+                    <option value="0">Expired</option>
+                    <option value="1">Damaged</option>
+                    <option value="2">Other</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Return Amount</label>
+                <input name="ReturnItems[INDEX].ReturnAmount" type="number" class="form-control return-amount" step="0.01" min="0" onchange="calculateTotals()" />
+            </div>
+            <div class="col-md-2" style="display: none;">
+                <label class="form-label">Custom Reason</label>
+                <input name="ReturnItems[INDEX].CustomReason" type="text" class="form-control custom-reason" placeholder="Specify reason" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        let orderItemIndex = 0;
+        let returnItemIndex = 0;
+
+        // Load shop information when shop is selected
+        function loadShopInfo(shopId) {
+            if (!shopId) {
+                document.getElementById('shopAddress').value = '';
+                document.getElementById('contactNo').value = '';
+                document.getElementById('previousCreditAmount').value = '0.00';
+                document.getElementById('previousCreditDisplay').textContent = '0.00';
+                return;
+            }
+
+            // Use fetch API instead of jQuery for better compatibility
+            fetch('/Order/GetShopInfo?shopId=' + shopId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('shopAddress').value = data.location || '';
+                    document.getElementById('contactNo').value = data.contact || '';
+                    document.getElementById('previousCreditAmount').value = data.previousCreditAmount.toFixed(2);
+                    document.getElementById('previousCreditDisplay').textContent = data.previousCreditAmount.toFixed(2);
+                    calculateTotals();
+                })
+                .catch(error => {
+                    console.error('Error loading shop information:', error);
+                    alert('Error loading shop information');
+                });
+        }
+
+        // Load product information when product is selected
+        function loadProductInfo(selectElement, index) {
+            const productId = selectElement.value;
+            if (!productId) return;
+
+            fetch('/Order/GetProductInfo?productId=' + productId)
+                .then(response => response.json())
+                .then(data => {
+                    const container = selectElement.closest('.item-row');
+                    container.querySelector('.price-input').value = data.unitPrice.toFixed(2);
+                    calculateItemTotal(selectElement, index);
+                })
+                .catch(error => {
+                    console.error('Error loading product information:', error);
+                    alert('Error loading product information');
+                });
+        }
+
+        // Load product information for return items
+        function loadReturnProductInfo(selectElement, index) {
+            const productId = selectElement.value;
+            if (!productId) {
+                // Clear return amount if no product selected
+                const container = selectElement.closest('.return-row');
+                container.querySelector('.return-amount').value = '';
+                calculateTotals();
+                return;
+            }
+
+            fetch('/Order/GetProductInfo?productId=' + productId)
+                .then(response => response.json())
+                .then(data => {
+                    const container = selectElement.closest('.return-row');
+                    const returnAmountInput = container.querySelector('.return-amount');
+                    const quantityInput = container.querySelector('.return-quantity');
+                    
+                    // Store the unit price as a data attribute for future calculations
+                    returnAmountInput.setAttribute('data-unit-price', data.unitPrice);
+                    
+                    // Set return amount to product price * quantity
+                    const quantity = parseFloat(quantityInput.value) || 1;
+                    const returnAmount = data.unitPrice * quantity;
+                    returnAmountInput.value = returnAmount.toFixed(2);
+                    
+                    calculateTotals();
+                })
+                .catch(error => {
+                    console.error('Error loading return product information:', error);
+                    alert('Error loading return product information');
+                });
+        }
+
+        // Update return amount when quantity changes
+        function updateReturnAmount(quantityInput, index) {
+            const container = quantityInput.closest('.return-row');
+            const returnAmountInput = container.querySelector('.return-amount');
+            const productSelect = container.querySelector('.return-product-select');
+            
+            // If no product is selected, just recalculate totals
+            if (!productSelect.value) {
+                calculateTotals();
+                return;
+            }
+            
+            // Get the stored unit price
+            const unitPrice = parseFloat(returnAmountInput.getAttribute('data-unit-price'));
+            
+            if (unitPrice) {
+                // Calculate new return amount based on quantity
+                const quantity = parseFloat(quantityInput.value) || 1;
+                const returnAmount = unitPrice * quantity;
+                returnAmountInput.value = returnAmount.toFixed(2);
+            }
+            
+            calculateTotals();
+        }
+
+        // Add new order item
+        function addOrderItem() {
+            const template = document.getElementById('orderItemTemplate');
+            if (!template) {
+                console.error('Order item template not found');
+                return;
+            }
+            
+            const clone = template.cloneNode(true);
+            clone.style.display = 'block';
+            clone.removeAttribute('id'); // Remove the template ID
+            clone.classList.add('order-item-' + orderItemIndex); // Add unique class for identification
+            clone.innerHTML = clone.innerHTML.replace(/INDEX/g, orderItemIndex);
+            document.getElementById('orderItemsContainer').appendChild(clone);
+            orderItemIndex++;
+        }
+
+        // Remove order item
+        function removeOrderItem(button) {
+            const itemRow = button.closest('.item-row');
+            if (itemRow) {
+                itemRow.remove();
+                calculateTotals();
+            }
+        }
+
+        // Add new return item
+        function addReturnItem() {
+            const template = document.getElementById('returnItemTemplate');
+            if (!template) {
+                console.error('Return item template not found');
+                return;
+            }
+            
+            const clone = template.cloneNode(true);
+            clone.style.display = 'block';
+            clone.removeAttribute('id'); // Remove the template ID
+            clone.classList.add('return-item-' + returnItemIndex); // Add unique class for identification
+            clone.innerHTML = clone.innerHTML.replace(/INDEX/g, returnItemIndex);
+            document.getElementById('returnItemsContainer').appendChild(clone);
+            returnItemIndex++;
+        }
+
+        // Remove return item
+        function removeReturnItem(button) {
+            const returnRow = button.closest('.return-row');
+            if (returnRow) {
+                returnRow.remove();
+                calculateTotals();
+            }
+        }
+
+        // Calculate individual item total
+        function calculateItemTotal(element, index) {
+            const container = element.closest('.item-row');
+            const quantity = parseFloat(container.querySelector('.quantity-input').value) || 0;
+            const unitPrice = parseFloat(container.querySelector('.price-input').value) || 0;
+            const discount = parseFloat(container.querySelector('.discount-input').value) || 0;
+            
+            const lineTotal = (quantity * unitPrice) - (quantity * discount);
+            container.querySelector('.line-total').value = lineTotal.toFixed(2);
+            
+            calculateTotals();
+        }
+
+        // Calculate all totals
+        function calculateTotals() {
+            // Calculate subtotal from order items
+            let subtotal = 0;
+            document.querySelectorAll('.line-total').forEach(function(input) {
+                subtotal += parseFloat(input.value) || 0;
+            });
+
+            // Calculate total returned
+            let totalReturned = 0;
+            document.querySelectorAll('.return-amount').forEach(function(input) {
+                totalReturned += parseFloat(input.value) || 0;
+            });
+
+            // Get other values
+            const invoiceDiscount = parseFloat(document.getElementById('InvoiceDiscount')?.value) || 0;
+            const previousCredit = parseFloat(document.getElementById('previousCreditAmount')?.value) || 0;
+            const todayPayment = parseFloat(document.getElementById('TodayPayment')?.value) || 0;
+            const taxPercentage = parseFloat(document.getElementById('TaxPercentage')?.value) || 0;
+
+            // Calculate tax amount
+            const taxAmount = (subtotal - invoiceDiscount) * taxPercentage / 100;
+
+            // Calculate net total
+            const netTotal = subtotal - invoiceDiscount + previousCredit - totalReturned + taxAmount;
+            
+            // Calculate outstanding balance
+            const outstanding = netTotal - todayPayment;
+
+            // Update displays
+            document.getElementById('subtotalDisplay').textContent = subtotal.toFixed(2);
+            document.getElementById('taxAmountDisplay').textContent = taxAmount.toFixed(2);
+            document.getElementById('totalReturnedDisplay').textContent = totalReturned.toFixed(2);
+            document.getElementById('netTotalDisplay').textContent = netTotal.toFixed(2);
+            document.getElementById('outstandingDisplay').textContent = outstanding.toFixed(2);
+
+            // Update hidden fields
+            const subtotalField = document.getElementById('Subtotal');
+            const totalReturnedField = document.getElementById('TotalReturned');
+            const netTotalField = document.getElementById('NetTotal');
+            const outstandingField = document.getElementById('OutstandingBalance');
+            
+            if (subtotalField) subtotalField.value = subtotal.toFixed(2);
+            if (totalReturnedField) totalReturnedField.value = totalReturned.toFixed(2);
+            if (netTotalField) netTotalField.value = netTotal.toFixed(2);
+            if (outstandingField) outstandingField.value = outstanding.toFixed(2);
+        }
+
+        // Toggle custom reason field for returns
+        function toggleCustomReason(selectElement, index) {
+            const container = selectElement.closest('.return-row');
+            const customReasonCol = container.querySelector('.col-md-2:last-child');
+            if (selectElement.value === '2') { // Other
+                customReasonCol.style.display = 'block';
+            } else {
+                customReasonCol.style.display = 'none';
+            }
+        }
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add initial order item
+            addOrderItem();
+            
+            // Set current date and time
+            const now = new Date();
+            
+            // Format date for display (Thursday, 2nd October 2025)
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const formattedDate = now.toLocaleDateString('en-GB', options);
+            
+            // Format ordinal numbers (1st, 2nd, 3rd, etc.)
+            const day = now.getDate();
+            let ordinalSuffix = 'th';
+            if (day % 10 === 1 && day !== 11) ordinalSuffix = 'st';
+            else if (day % 10 === 2 && day !== 12) ordinalSuffix = 'nd';
+            else if (day % 10 === 3 && day !== 13) ordinalSuffix = 'rd';
+            
+            const finalFormattedDate = formattedDate.replace(/\d+/, day + ordinalSuffix);
+            document.getElementById('currentDateTime').textContent = finalFormattedDate;
+            
+            // Set hidden fields
+            const dateString = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            
+            const orderDateField = document.getElementById('OrderDate');
+            const orderTimeField = document.getElementById('OrderTime');
+            
+            if (orderDateField) orderDateField.value = dateString;
+            if (orderTimeField) orderTimeField.value = timeString;
+        });
+    </script>
+}
+

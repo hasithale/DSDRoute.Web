@@ -1,0 +1,276 @@
+@model IEnumerable<DSDRoute.Models.Return>
+@{
+    ViewData["Title"] = "Return Management";
+    var isAdmin = ViewBag.IsAdmin ?? false;
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-undo me-3"></i>Return Management
+            </h1>
+            <p class="text-muted mb-0">Track product returns and stock adjustments</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #667eea;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold text-gradient mb-1">@Model.Count()</h3>
+                            <p class="text-muted mb-0">Total Returns</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(102, 126, 234, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-undo" style="color: #667eea; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #dc3545;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #dc3545;">@Model.Sum(r => r.Quantity)</h3>
+                            <p class="text-muted mb-0">Total Items Returned</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(220, 53, 69, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-boxes" style="color: #dc3545; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #fd7e14;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            @{
+                                var totalRefund = 0m;
+                                foreach(var r in Model.Where(r => r.RefundAmount.HasValue))
+                                {
+                                    totalRefund += r.RefundAmount!.Value;
+                                }
+                            }
+                            <h3 class="fw-bold mb-1" style="color: #fd7e14;">Rs. @totalRefund.ToString("0.00")</h3>
+                            <p class="text-muted mb-0">Total Refunds</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(253, 126, 20, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-money-bill-wave" style="color: #fd7e14; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #28a745;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #28a745;">@Model.Count(r => r.Status == DSDRoute.Models.ReturnStatus.Processed)</h3>
+                            <p class="text-muted mb-0">Processed</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(40, 167, 69, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check-circle" style="color: #28a745; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Returns Table -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Return Records
+                </h5>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control modern-form-control" placeholder="Search returns..." id="returnSearch">
+                    <button class="modern-btn modern-btn-outline" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modern-card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="modern-table table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1.5rem 1rem;">Return #</th>
+                                <th style="padding: 1.5rem 1rem;">Product</th>
+                                <th style="padding: 1.5rem 1rem;">Shop</th>
+                                <th style="padding: 1.5rem 1rem;">Quantity</th>
+                                <th style="padding: 1.5rem 1rem;">Reason</th>
+                                <th style="padding: 1.5rem 1rem;">Refund</th>
+                                <th style="padding: 1.5rem 1rem;">Date</th>
+                                <th style="padding: 1.5rem 1rem;">Status</th>
+                                <th style="padding: 1.5rem 1rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var returnItem in Model)
+                            {
+                                <tr>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold">#@returnItem.Id</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div class="d-flex align-items-center">
+                                            <div style="width: 40px; height: 40px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center;" class="me-2">
+                                                <i class="fas fa-box text-muted"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">@returnItem.Product.Name</div>
+                                                <small class="text-muted">Rs. @returnItem.Product.Price.ToString("0.00")/unit</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div class="fw-semibold">@returnItem.Shop.Name</div>
+                                            <small class="text-muted">@returnItem.Shop.Location</small>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold text-danger">@returnItem.Quantity</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (returnItem.Reason.ToLower().Contains("damaged"))
+                                        {
+                                            <span class="badge bg-danger px-2 py-1">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Damaged
+                                            </span>
+                                        }
+                                        else if (returnItem.Reason.ToLower().Contains("expired"))
+                                        {
+                                            <span class="badge bg-warning px-2 py-1">
+                                                <i class="fas fa-calendar-times me-1"></i>Expired
+                                            </span>
+                                        }
+                                        else if (returnItem.Reason.ToLower().Contains("unsold"))
+                                        {
+                                            <span class="badge bg-secondary px-2 py-1">
+                                                <i class="fas fa-shopping-cart me-1"></i>Unsold
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info px-2 py-1">
+                                                <i class="fas fa-question-circle me-1"></i>@returnItem.Reason
+                                            </span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold text-warning">@(returnItem.RefundAmount.HasValue ? "Rs. " + returnItem.RefundAmount.Value.ToString("0.00") : "N/A")</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div>@returnItem.ReturnDate.ToString("MMM dd, yyyy")</div>
+                                            <small class="text-muted">@returnItem.ReturnDate.ToString("hh:mm tt")</small>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (returnItem.Status == DSDRoute.Models.ReturnStatus.Processed)
+                                        {
+                                            <span class="badge bg-success px-3 py-2 rounded-pill">
+                                                <i class="fas fa-check-circle me-1"></i>Processed
+                                            </span>
+                                        }
+                                        else if (returnItem.Status == DSDRoute.Models.ReturnStatus.Approved)
+                                        {
+                                            <span class="badge bg-info px-3 py-2 rounded-pill">
+                                                <i class="fas fa-thumbs-up me-1"></i>Approved
+                                            </span>
+                                        }
+                                        else if (returnItem.Status == DSDRoute.Models.ReturnStatus.Rejected)
+                                        {
+                                            <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                                <i class="fas fa-times-circle me-1"></i>Rejected
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning px-3 py-2 rounded-pill">
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            </span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div class="btn-group" role="group">
+                                            <a class="modern-btn modern-btn-primary btn-sm" asp-action="Details" asp-route-id="@returnItem.Id" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (isAdmin && returnItem.Status != DSDRoute.Models.ReturnStatus.Processed)
+                                            {
+                                                <form asp-action="Process" asp-route-id="@returnItem.Id" method="post" style="display:inline;" 
+                                                      onsubmit="return confirm('Process this return? This will adjust stock levels.');">
+                                                    <button type="submit" class="modern-btn modern-btn-success btn-sm" title="Process Return">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            <a class="modern-btn modern-btn-info btn-sm" asp-controller="Product" asp-action="Details" asp-route-id="@returnItem.ProductId" title="View Product">
+                                                <i class="fas fa-box"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <i class="fas fa-undo" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h4 class="text-muted mb-2">No Returns Found</h4>
+                    <p class="text-muted">Product returns will appear here when shops return items that are damaged, expired, or unsold.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple search functionality
+        document.getElementById('returnSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const returnId = row.querySelector('td .fw-semibold').textContent.toLowerCase();
+                const productName = row.querySelectorAll('td')[1].querySelector('.fw-semibold').textContent.toLowerCase();
+                const shopName = row.querySelectorAll('td')[2].querySelector('.fw-semibold').textContent.toLowerCase();
+                const reason = row.querySelectorAll('td')[4].textContent.toLowerCase();
+                if (returnId.includes(searchTerm) || productName.includes(searchTerm) || shopName.includes(searchTerm) || reason.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Tooltip for notes
+        document.querySelectorAll('[title]').forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                this.setAttribute('title', this.getAttribute('title'));
+            });
+        });
+    </script>
+}

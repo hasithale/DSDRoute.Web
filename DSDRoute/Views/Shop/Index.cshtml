@@ -1,0 +1,244 @@
+@model IEnumerable<DSDRoute.Models.Shop>
+@{
+    ViewData["Title"] = "Shop Management";
+    var canAdd = ViewBag.CanAdd ?? false;
+    var canEdit = ViewBag.CanEdit ?? false;
+    var canDelete = ViewBag.CanDelete ?? false;
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-store me-3"></i>Shop Management
+            </h1>
+            <p class="text-muted mb-0">Manage retail shop locations and details</p>
+        </div>
+        @if (canAdd)
+        {
+            <a class="modern-btn modern-btn-success" asp-action="Create">
+                <i class="fas fa-plus me-2"></i>Add New Shop
+            </a>
+        }
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #667eea;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold text-gradient mb-1">@Model.Count()</h3>
+                            <p class="text-muted mb-0">Total Shops</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(102, 126, 234, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-store" style="color: #667eea; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #4facfe;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #4facfe;">@Model.Count(s => s.IsActive)</h3>
+                            <p class="text-muted mb-0">Active Shops</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(75, 172, 254, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check-circle" style="color: #4facfe; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #f093fb;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #f093fb;">@Model.Count(s => !s.IsActive)</h3>
+                            <p class="text-muted mb-0">Inactive Shops</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(240, 147, 251, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-times-circle" style="color: #f093fb; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #28a745;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #28a745;">@DateTime.Today.ToString("MMM dd")</h3>
+                            <p class="text-muted mb-0">Today's Date</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(40, 167, 69, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-calendar" style="color: #28a745; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shops Table -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Shop Directory
+                </h5>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control modern-form-control" placeholder="Search shops..." id="shopSearch">
+                    <button class="modern-btn modern-btn-outline" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modern-card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="modern-table table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1.5rem 1rem;">Shop Details</th>
+                                <th style="padding: 1.5rem 1rem;">Location</th>
+                                <th style="padding: 1.5rem 1rem;">Contact</th>
+                                <th style="padding: 1.5rem 1rem;">Status</th>
+                                <th style="padding: 1.5rem 1rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var shop in Model)
+                            {
+                                <tr>
+                                    <td style="padding: 1rem;">
+                                        <div class="d-flex align-items-center">
+                                            <div class="shop-avatar me-3">
+                                                @shop.Name.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">@shop.Name</div>
+                                                <small class="text-muted">ID: @shop.Id</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div class="fw-semibold">@shop.Location</div>
+                                            @if (!string.IsNullOrEmpty(shop.Address))
+                                            {
+                                                <small class="text-muted">@shop.Address</small>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div>@shop.Contact</div>
+                                            @if (!string.IsNullOrEmpty(shop.Email))
+                                            {
+                                                <small class="text-muted">@shop.Email</small>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (shop.IsActive)
+                                        {
+                                            <span class="badge bg-success px-3 py-2 rounded-pill">
+                                                <i class="fas fa-check-circle me-1"></i>Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                                <i class="fas fa-times-circle me-1"></i>Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div class="btn-group" role="group">
+                                            <a class="modern-btn modern-btn-primary btn-sm" asp-action="Details" asp-route-id="@shop.Id" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (canEdit)
+                                            {
+                                                <a class="modern-btn modern-btn-outline btn-sm" asp-action="Edit" asp-route-id="@shop.Id" title="Edit Shop">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            }
+                                            @if (canDelete && shop.IsActive)
+                                            {
+                                                <form asp-action="Delete" asp-route-id="@shop.Id" method="post" style="display:inline;" 
+                                                      onsubmit="return confirm('Are you sure you want to deactivate this shop?');">
+                                                    <button type="submit" class="modern-btn btn-sm" style="background: #f5576c; color: white;" title="Deactivate Shop">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <i class="fas fa-store" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h4 class="text-muted mb-2">No Shops Found</h4>
+                    <p class="text-muted">Start by adding your first retail shop location.</p>
+                    <a class="modern-btn modern-btn-success" asp-action="Create">
+                        <i class="fas fa-plus me-2"></i>Add First Shop
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple search functionality
+        document.getElementById('shopSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const shopName = row.querySelector('td .fw-semibold').textContent.toLowerCase();
+                const location = row.querySelectorAll('td')[1].textContent.toLowerCase();
+                if (shopName.includes(searchTerm) || location.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    .shop-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+</style>

@@ -1,0 +1,307 @@
+@model IEnumerable<DSDRoute.Models.Product>
+@{
+    ViewData["Title"] = "Product Management";
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-box me-3"></i>Product Management
+            </h1>
+            <p class="text-muted mb-0">Manage product inventory and pricing</p>
+        </div>
+        <a class="modern-btn modern-btn-success" asp-action="Create">
+            <i class="fas fa-plus me-2"></i>Add New Product
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #667eea;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold text-gradient mb-1">@Model.Count()</h3>
+                            <p class="text-muted mb-0">Total Products</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(102, 126, 234, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-box" style="color: #667eea; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #4facfe;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #4facfe;">@Model.Count(p => p.IsActive)</h3>
+                            <p class="text-muted mb-0">Active Products</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(75, 172, 254, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check-circle" style="color: #4facfe; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #f093fb;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #f093fb;">@Model.Where(p => p.IsActive).Sum(p => p.StockQty)</h3>
+                            <p class="text-muted mb-0">Total Stock</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(240, 147, 251, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-warehouse" style="color: #f093fb; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #ff6b6b;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #ff6b6b;">@Model.Count(p => p.StockQty < 10)</h3>
+                            <p class="text-muted mb-0">Low Stock</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(255, 107, 107, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-exclamation-triangle" style="color: #ff6b6b; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Product Inventory
+                </h5>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control modern-form-control" placeholder="Search products..." id="productSearch">
+                    <button class="modern-btn modern-btn-outline" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modern-card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="modern-table table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1.5rem 1rem;">Product</th>
+                                <th style="padding: 1.5rem 1rem;">SKU</th>
+                                <th style="padding: 1.5rem 1rem;">Category</th>
+                                <th style="padding: 1.5rem 1rem;">Price</th>
+                                <th style="padding: 1.5rem 1rem;">Stock</th>
+                                <th style="padding: 1.5rem 1rem;">Status</th>
+                                <th style="padding: 1.5rem 1rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model)
+                            {
+                                <tr>
+                                    <td style="padding: 1rem;">
+                                        <div class="d-flex align-items-center">
+                                            <div class="product-avatar me-3">
+                                                @product.Name.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">@product.Name</div>
+                                                @if (!string.IsNullOrEmpty(product.Description))
+                                                {
+                                                    <small class="text-muted">@product.Description.Substring(0, Math.Min(50, product.Description.Length))@(product.Description.Length > 50 ? "..." : "")</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <span class="badge bg-light text-dark px-2 py-1">@product.SKU</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (!string.IsNullOrEmpty(product.Category))
+                                        {
+                                            <span class="badge bg-info px-2 py-1">@product.Category</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold text-success">Rs. @product.Price.ToString("0.00")</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (product.StockQty < 10)
+                                        {
+                                            <span class="badge bg-danger px-2 py-1">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>@product.StockQty
+                                            </span>
+                                        }
+                                        else if (product.StockQty < 50)
+                                        {
+                                            <span class="badge bg-warning px-2 py-1">@product.StockQty</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success px-2 py-1">@product.StockQty</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (product.IsActive)
+                                        {
+                                            <span class="badge bg-success px-3 py-2 rounded-pill">
+                                                <i class="fas fa-check-circle me-1"></i>Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                                <i class="fas fa-times-circle me-1"></i>Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div class="btn-group" role="group">
+                                            <a class="modern-btn modern-btn-primary btn-sm" asp-action="Details" asp-route-id="@product.Id" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a class="modern-btn modern-btn-outline btn-sm" asp-action="Edit" asp-route-id="@product.Id" title="Edit Product">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="modern-btn modern-btn-info btn-sm" onclick="updateStock(@product.Id, @product.StockQty)" title="Update Stock">
+                                                <i class="fas fa-boxes"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <i class="fas fa-box" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h4 class="text-muted mb-2">No Products Found</h4>
+                    <p class="text-muted">Start by adding your first product to the inventory.</p>
+                    <a class="modern-btn modern-btn-success" asp-action="Create">
+                        <i class="fas fa-plus me-2"></i>Add First Product
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Stock Update Modal -->
+<div class="modal fade" id="stockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="stockForm">
+                    <input type="hidden" id="productId" />
+                    <div class="mb-3">
+                        <label for="newStock" class="form-label">New Stock Quantity</label>
+                        <input type="number" class="form-control" id="newStock" min="0" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modern-btn modern-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="modern-btn modern-btn-success" onclick="saveStock()">Update Stock</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple search functionality
+        document.getElementById('productSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const productName = row.querySelector('td .fw-semibold').textContent.toLowerCase();
+                const sku = row.querySelectorAll('td')[1].textContent.toLowerCase();
+                const category = row.querySelectorAll('td')[2].textContent.toLowerCase();
+                if (productName.includes(searchTerm) || sku.includes(searchTerm) || category.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        function updateStock(productId, currentStock) {
+            document.getElementById('productId').value = productId;
+            document.getElementById('newStock').value = currentStock;
+            new bootstrap.Modal(document.getElementById('stockModal')).show();
+        }
+
+        function saveStock() {
+            const productId = document.getElementById('productId').value;
+            const newStock = document.getElementById('newStock').value;
+            
+            fetch(`/Product/UpdateStock`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify({ id: productId, newStock: newStock })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating stock: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating stock');
+            });
+        }
+    </script>
+}
+
+<style>
+    .product-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+</style>

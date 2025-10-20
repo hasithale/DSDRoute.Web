@@ -1,0 +1,429 @@
+@using System.Security.Claims
+@model DSDRoute.Models.Order
+@{
+    ViewData["Title"] = $"Order #{Model.Id} Details";
+    var isAdmin = User.IsInRole("Admin");
+    var canEdit = isAdmin || (User.IsInRole("SalesRep") && Model.SalesRepId == User.FindFirstValue(ClaimTypes.NameIdentifier));
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-file-invoice me-3"></i>Order #@Model.Id
+            </h1>
+            <p class="text-muted mb-0">Order details and management</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="modern-btn modern-btn-secondary" asp-action="Index">
+                <i class="fas fa-arrow-left me-2"></i>Back to Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- Order Status Alert -->
+    <div class="row mb-4">
+        <div class="col-12">
+            @switch (Model.Status)
+            {
+                case DSDRoute.Models.OrderStatus.Pending:
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="fas fa-clock me-2"></i>
+                        <span>This order is pending approval.</span>
+                    </div>
+                    break;
+                case DSDRoute.Models.OrderStatus.Approved:
+                    <div class="alert alert-info d-flex align-items-center">
+                        <i class="fas fa-thumbs-up me-2"></i>
+                        <span>This order has been approved and is ready for delivery.</span>
+                    </div>
+                    break;
+                case DSDRoute.Models.OrderStatus.Delivered:
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span>This order has been delivered successfully.</span>
+                    </div>
+                    break;
+                case DSDRoute.Models.OrderStatus.Rejected:
+                    <div class="alert alert-danger d-flex align-items-center">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <span>This order has been rejected. @(!string.IsNullOrEmpty(Model.RejectionReason) ? $"Reason: {Model.RejectionReason}" : "")</span>
+                    </div>
+                    break;
+                case DSDRoute.Models.OrderStatus.Cancelled:
+                    <div class="alert alert-secondary d-flex align-items-center">
+                        <i class="fas fa-ban me-2"></i>
+                        <span>This order has been cancelled.</span>
+                    </div>
+                    break;
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Order Information -->
+        <div class="col-lg-8 mb-4">
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Order Information
+                    </h4>
+                </div>
+                <div class="modern-card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Order Date</label>
+                            <p class="mb-0">@Model.OrderDate.ToString("MMMM dd, yyyy 'at' hh:mm tt")</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Status</label>
+                            <div>
+                                @switch (Model.Status)
+                                {
+                                    case DSDRoute.Models.OrderStatus.Pending:
+                                        <span class="badge bg-warning px-3 py-2 rounded-pill">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                        break;
+                                    case DSDRoute.Models.OrderStatus.Approved:
+                                        <span class="badge bg-info px-3 py-2 rounded-pill">
+                                            <i class="fas fa-thumbs-up me-1"></i>Approved
+                                        </span>
+                                        break;
+                                    case DSDRoute.Models.OrderStatus.InvoiceGenerated:
+                                        <span class="badge bg-primary px-3 py-2 rounded-pill">
+                                            <i class="fas fa-file-invoice me-1"></i>Invoice Generated
+                                        </span>
+                                        break;
+                                    case DSDRoute.Models.OrderStatus.Delivered:
+                                        <span class="badge bg-success px-3 py-2 rounded-pill">
+                                            <i class="fas fa-check-circle me-1"></i>Delivered
+                                        </span>
+                                        break;
+                                    case DSDRoute.Models.OrderStatus.Cancelled:
+                                        <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                            <i class="fas fa-ban me-1"></i>Cancelled
+                                        </span>
+                                        break;
+                                    case DSDRoute.Models.OrderStatus.Rejected:
+                                        <span class="badge bg-secondary px-3 py-2 rounded-pill">
+                                            <i class="fas fa-times-circle me-1"></i>Rejected
+                                        </span>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Shop</label>
+                            <p class="mb-0">
+                                <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.ShopId" 
+                                   class="text-decoration-none">@Model.Shop.Name</a>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Sales Representative</label>
+                            <p class="mb-0">@Model.SalesRep.Email</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-muted">Total Amount</label>
+                            <h5 class="text-success fw-bold mb-0">Rs. @Model.TotalAmount.ToString("0.00")</h5>
+                        </div>
+                        @if (Model.ApprovalDate.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted">Approval Date</label>
+                                <p class="mb-0">@Model.ApprovalDate.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt")</p>
+                            </div>
+                        }
+                        @if (Model.DeliveryDate.HasValue)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted">Delivery Date</label>
+                                <p class="mb-0">@Model.DeliveryDate.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt")</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-semibold text-muted">Notes</label>
+                                <p class="mb-0">@Model.Notes</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="modern-card mt-4">
+                <div class="modern-card-header">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-list me-2"></i>Order Items
+                    </h4>
+                </div>
+                <div class="modern-card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead style="background: rgba(102, 126, 234, 0.1);">
+                                <tr>
+                                    <th style="padding: 1rem; border: none; font-weight: 600;">Product</th>
+                                    <th style="padding: 1rem; border: none; font-weight: 600;">Quantity</th>
+                                    <th style="padding: 1rem; border: none; font-weight: 600;">Unit Price</th>
+                                    <th style="padding: 1rem; border: none; font-weight: 600;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td style="padding: 1rem; vertical-align: middle;">
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <div class="fw-semibold">
+                                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@item.ProductId" 
+                                                           class="text-decoration-none">@item.Product.Name</a>
+                                                    </div>
+                                                    <small class="text-muted">@item.Product.Category</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 1rem; vertical-align: middle;">
+                                            <span class="fw-semibold">@item.Quantity</span>
+                                        </td>
+                                        <td style="padding: 1rem; vertical-align: middle;">
+                                            Rs. @item.Price.ToString("0.00")
+                                        </td>
+                                        <td style="padding: 1rem; vertical-align: middle;">
+                                            <span class="fw-semibold text-success">Rs. @item.Total.ToString("0.00")</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot style="background: rgba(102, 126, 234, 0.05);">
+                                <tr>
+                                    <th colspan="3" style="padding: 1rem; text-align: right;">Total Amount:</th>
+                                    <th style="padding: 1rem;">
+                                        <span class="h5 text-success fw-bold mb-0">Rs. @Model.TotalAmount.ToString("0.00")</span>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Returned Items -->
+            @if (Model.Returns.Any())
+            {
+                <div class="modern-card mt-4">
+                    <div class="modern-card-header">
+                        <h4 class="fw-bold mb-0">
+                            <i class="fas fa-undo me-2"></i>Returned Items
+                        </h4>
+                    </div>
+                    <div class="modern-card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead style="background: rgba(255, 107, 107, 0.1);">
+                                    <tr>
+                                        <th style="padding: 1rem; border: none; font-weight: 600;">Product</th>
+                                        <th style="padding: 1rem; border: none; font-weight: 600;">Quantity</th>
+                                        <th style="padding: 1rem; border: none; font-weight: 600;">Reason</th>
+                                        <th style="padding: 1rem; border: none; font-weight: 600;">Status</th>
+                                        <th style="padding: 1rem; border: none; font-weight: 600;">Return Date</th>
+                                        <th style="padding: 1rem; border: none; font-weight: 600;">Refund Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var returnItem in Model.Returns)
+                                    {
+                                        <tr>
+                                            <td style="padding: 1rem; vertical-align: middle;">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <div class="fw-semibold">
+                                                            <a asp-controller="Product" asp-action="Details" asp-route-id="@returnItem.ProductId" 
+                                                               class="text-decoration-none">@returnItem.Product.Name</a>
+                                                        </div>
+                                                        <small class="text-muted">@returnItem.Product.Category</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="padding: 1rem; vertical-align: middle;">
+                                                <span class="fw-semibold text-danger">@returnItem.Quantity</span>
+                                            </td>
+                                            <td style="padding: 1rem; vertical-align: middle;">
+                                                <span class="text-muted">@returnItem.Reason</span>
+                                            </td>
+                                            <td style="padding: 1rem; vertical-align: middle;">
+                                                @switch (returnItem.Status)
+                                                {
+                                                    case DSDRoute.Models.ReturnStatus.Pending:
+                                                        <span class="badge bg-warning px-2 py-1 rounded-pill">
+                                                            <i class="fas fa-clock me-1"></i>Pending
+                                                        </span>
+                                                        break;
+                                                    case DSDRoute.Models.ReturnStatus.Approved:
+                                                        <span class="badge bg-success px-2 py-1 rounded-pill">
+                                                            <i class="fas fa-check me-1"></i>Approved
+                                                        </span>
+                                                        break;
+                                                    case DSDRoute.Models.ReturnStatus.Rejected:
+                                                        <span class="badge bg-danger px-2 py-1 rounded-pill">
+                                                            <i class="fas fa-times me-1"></i>Rejected
+                                                        </span>
+                                                        break;
+                                                    case DSDRoute.Models.ReturnStatus.Processed:
+                                                        <span class="badge bg-primary px-2 py-1 rounded-pill">
+                                                            <i class="fas fa-check-circle me-1"></i>Processed
+                                                        </span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td style="padding: 1rem; vertical-align: middle;">
+                                                <small class="text-muted">@returnItem.ReturnDate.ToString("MMM dd, yyyy")</small>
+                                            </td>
+                                            <td style="padding: 1rem; vertical-align: middle;">
+                                                @if (returnItem.RefundAmount.HasValue)
+                                                {
+                                                    <span class="fw-semibold text-danger">Rs. @returnItem.RefundAmount.Value.ToString("0.00")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                @if (Model.Returns.Where(r => r.RefundAmount.HasValue).Any())
+                                {
+                                    <tfoot style="background: rgba(255, 107, 107, 0.05);">
+                                        <tr>
+                                            <th colspan="5" style="padding: 1rem; text-align: right;">Total Refund Amount:</th>
+                                            <th style="padding: 1rem;">
+                                                <span class="h6 text-danger fw-bold mb-0">Rs. @Model.Returns.Where(r => r.RefundAmount.HasValue).Sum(r => r.RefundAmount!.Value).ToString("0.00")</span>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Actions Panel -->
+        <div class="col-lg-4">
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-cogs me-2"></i>Actions
+                    </h4>
+                </div>
+                <div class="modern-card-body">
+                    @if (isAdmin && Model.Status == DSDRoute.Models.OrderStatus.Pending)
+                    {
+                        <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="mb-2"
+                              onsubmit="return confirm('Are you sure you want to approve this order?');">
+                            <button type="submit" class="modern-btn modern-btn-success w-100">
+                                <i class="fas fa-thumbs-up me-2"></i>Approve Order
+                            </button>
+                        </form>
+                        
+                        <button type="button" class="modern-btn modern-btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <i class="fas fa-times me-2"></i>Reject Order
+                        </button>
+                    }
+                    
+                    @if ((isAdmin || canEdit) && Model.Status == DSDRoute.Models.OrderStatus.Approved)
+                    {
+                        <form asp-action="MarkDelivered" asp-route-id="@Model.Id" method="post" class="mb-2"
+                              onsubmit="return confirm('Mark this order as delivered?');">
+                            <button type="submit" class="modern-btn modern-btn-info w-100">
+                                <i class="fas fa-truck me-2"></i>Mark as Delivered
+                            </button>
+                        </form>
+                    }
+
+                    <!-- Related Actions -->
+                    <div class="mt-4">
+                        <h6 class="fw-semibold mb-3">Related Actions</h6>
+                        
+                        <a asp-controller="Payment" asp-action="Index" asp-route-orderId="@Model.Id" 
+                           class="modern-btn modern-btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-credit-card me-2"></i>View Payments
+                        </a>
+                        
+                        <a asp-controller="Return" asp-action="Create" asp-route-orderId="@Model.Id" 
+                           class="modern-btn modern-btn-outline-warning w-100">
+                            <i class="fas fa-undo me-2"></i>Create Return
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="modern-card mt-4">
+                <div class="modern-card-header">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Order Summary
+                    </h4>
+                </div>
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Items Count:</span>
+                        <span class="fw-semibold">@Model.OrderItems.Count</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Quantity:</span>
+                        <span class="fw-semibold">@Model.OrderItems.Sum(oi => oi.Quantity)</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Payments Received:</span>
+                        <span class="fw-semibold text-success">Rs. @Model.Payments.Sum(p => p.Amount).ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Returns:</span>
+                        <span class="fw-semibold text-warning">@Model.Returns.Count</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">Balance Due:</span>
+                        <span class="fw-bold text-primary">Rs. @((Model.TotalAmount - Model.Payments.Sum(p => p.Amount)).ToString("0.00"))</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Order Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);">
+            <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="rejectModalLabel">
+                        <i class="fas fa-times me-2"></i>Reject Order
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label fw-semibold">Rejection Reason</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" required 
+                                  placeholder="Please provide a reason for rejecting this order..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="modern-btn modern-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="modern-btn modern-btn-danger">
+                        <i class="fas fa-times me-2"></i>Reject Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,105 @@
+@model DSDRoute.Models.CreateUserViewModel
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="fade-in-up">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-user-plus me-3"></i>Create User
+            </h1>
+            <p class="text-muted mb-0">Add a new user to the system</p>
+        </div>
+        <a class="modern-btn modern-btn-outline" asp-action="Index">
+            <i class="fas fa-arrow-left me-2"></i>Back to Users
+        </a>
+    </div>
+
+    <!-- Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <i class="fas fa-user-cog me-2"></i>User Information
+                </div>
+                <div class="modern-card-body">
+                    <form asp-action="Create" method="post">
+                        <div class="mb-4">
+                            <label asp-for="Email" class="modern-form-label">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            <input asp-for="Email" class="modern-form-control" placeholder="user@example.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Password" class="modern-form-label">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <div class="position-relative">
+                                <input asp-for="Password" class="modern-form-control" placeholder="Enter a secure password" />
+                                <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Password must be at least 6 characters with uppercase, lowercase, and digit.
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Role" class="modern-form-label">
+                                <i class="fas fa-user-tag me-2"></i>User Role
+                            </label>
+                            <select asp-for="Role" class="modern-form-control">
+                                <option value="User">👤 User - Standard Access</option>
+                                <option value="Admin">👑 Admin - Full Access</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a class="modern-btn modern-btn-outline me-md-2" asp-action="Index">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="modern-btn modern-btn-success">
+                                <i class="fas fa-user-plus me-2"></i>Create User
+                            </button>
+                        </div>
+                        
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="modern-alert alert-danger mt-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        function togglePassword() {
+            const passwordInput = document.querySelector('input[name="Password"]');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'fas fa-eye';
+            }
+        }
+    </script>
+}

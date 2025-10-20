@@ -1,0 +1,114 @@
+@model DSDRoute.Models.Shop
+@{
+    ViewData["Title"] = "Add New Shop";
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-plus-circle me-3"></i>Add New Shop
+            </h1>
+            <p class="text-muted mb-0">Create a new retail location in the system</p>
+        </div>
+        <a class="modern-btn modern-btn-outline" asp-action="Index">
+            <i class="fas fa-arrow-left me-2"></i>Back to Shops
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-store me-2"></i>Shop Information
+            </h5>
+        </div>
+        <div class="modern-card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Name" class="modern-form-label">Shop Name *</label>
+                        <input asp-for="Name" class="form-control modern-form-control" placeholder="Enter shop name" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Contact" class="modern-form-label">Contact Information *</label>
+                        <input asp-for="Contact" class="form-control modern-form-control" placeholder="Enter contact details" />
+                        <span asp-validation-for="Contact" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Email" class="modern-form-label">Email Address</label>
+                        <input asp-for="Email" type="email" class="form-control modern-form-control" placeholder="Enter email address" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CreatedBy" class="modern-form-label">Created By</label>
+                        <input asp-for="CreatedBy" class="form-control modern-form-control" placeholder="Enter creator name" />
+                        <span asp-validation-for="CreatedBy" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Location" class="modern-form-label">Location *</label>
+                    <textarea asp-for="Location" class="form-control modern-form-control" rows="3" placeholder="Enter complete address"></textarea>
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Address" class="modern-form-label">Additional Address Details</label>
+                    <textarea asp-for="Address" class="form-control modern-form-control" rows="2" placeholder="Enter additional address information (optional)"></textarea>
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                        <label asp-for="IsActive" class="form-check-label modern-form-label">
+                            Active Shop
+                        </label>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                    </div>
+                    <small class="text-muted">Inactive shops won't appear in order selection</small>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 mt-4">
+                    <a class="modern-btn modern-btn-outline" asp-action="Index">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="modern-btn modern-btn-primary">
+                        <i class="fas fa-save me-2"></i>Create Shop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Form validation feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === '') {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                });
+            });
+        });
+    </script>
+}

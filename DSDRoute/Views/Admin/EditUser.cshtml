@@ -1,0 +1,90 @@
+@model DSDRoute.Models.EditUserViewModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="fade-in-up">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-user-edit me-3"></i>Edit User
+            </h1>
+            <p class="text-muted mb-0">Modify user account settings</p>
+        </div>
+        <a class="modern-btn modern-btn-outline" asp-action="Dashboard">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <i class="fas fa-user-cog me-2"></i>User Information
+                </div>
+                <div class="modern-card-body">
+                    <form asp-action="EditUser" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        
+                        <div class="mb-4">
+                            <label asp-for="Email" class="modern-form-label">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            <input asp-for="Email" class="modern-form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Role" class="modern-form-label">
+                                <i class="fas fa-user-tag me-2"></i>User Role
+                            </label>
+                            <select asp-for="Role" class="modern-form-control">
+                                <option value="User">👤 User - Standard Access</option>
+                                <option value="Admin">👑 Admin - Full Access</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: #f8fafc; border: 2px solid #e2e8f0;">
+                                <div>
+                                    <label asp-for="IsActive" class="modern-form-label mb-1">
+                                        <i class="fas fa-toggle-on me-2"></i>Account Status
+                                    </label>
+                                    <p class="text-muted small mb-0">Enable or disable this user account</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsActive" class="form-check-input" style="width: 3rem; height: 1.5rem;" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a class="modern-btn modern-btn-outline me-md-2" asp-action="Dashboard">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="modern-btn modern-btn-primary">
+                                <i class="fas fa-save me-2"></i>Update User
+                            </button>
+                        </div>
+                        
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="modern-alert alert-danger mt-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

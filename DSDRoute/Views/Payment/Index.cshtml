@@ -1,0 +1,241 @@
+@model IEnumerable<DSDRoute.Models.Payment>
+@{
+    ViewData["Title"] = "Payment Management";
+    var isAdmin = ViewBag.IsAdmin ?? false;
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-credit-card me-3"></i>Payment Management
+            </h1>
+            <p class="text-muted mb-0">Track and verify payment records</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #667eea;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold text-gradient mb-1">@Model.Count()</h3>
+                            <p class="text-muted mb-0">Total Payments</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(102, 126, 234, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-credit-card" style="color: #667eea; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #28a745;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #28a745;">Rs. @Model.Sum(p => p.Amount).ToString("0.00")</h3>
+                            <p class="text-muted mb-0">Total Amount</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(40, 167, 69, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-dollar-sign" style="color: #28a745; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #4facfe;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #4facfe;">@Model.Count(p => p.IsVerified)</h3>
+                            <p class="text-muted mb-0">Verified</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(75, 172, 254, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check-circle" style="color: #4facfe; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #f093fb;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #f093fb;">@Model.Count(p => !p.IsVerified)</h3>
+                            <p class="text-muted mb-0">Pending Verification</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(240, 147, 251, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-clock" style="color: #f093fb; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Payment Records
+                </h5>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control modern-form-control" placeholder="Search payments..." id="paymentSearch">
+                    <button class="modern-btn modern-btn-outline" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modern-card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="modern-table table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1.5rem 1rem;">Payment #</th>
+                                <th style="padding: 1.5rem 1rem;">Order</th>
+                                <th style="padding: 1.5rem 1rem;">Shop</th>
+                                <th style="padding: 1.5rem 1rem;">Amount</th>
+                                <th style="padding: 1.5rem 1rem;">Type</th>
+                                <th style="padding: 1.5rem 1rem;">Date</th>
+                                <th style="padding: 1.5rem 1rem;">Status</th>
+                                <th style="padding: 1.5rem 1rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var payment in Model)
+                            {
+                                <tr>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold">#@payment.Id</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <a href="/Order/Details/@payment.OrderId" class="text-decoration-none">
+                                            <span class="fw-semibold text-primary">#@payment.OrderId</span>
+                                        </a>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div class="fw-semibold">@payment.Order.Shop.Name</div>
+                                            <small class="text-muted">@payment.Order.Shop.Location</small>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold text-success">Rs. @payment.Amount.ToString("0.00")</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @switch (payment.PaymentType)
+                                        {
+                                            case DSDRoute.Models.PaymentType.Cash:
+                                                <span class="badge bg-success px-2 py-1">
+                                                    <i class="fas fa-money-bill me-1"></i>Cash
+                                                </span>
+                                                break;
+                                            case DSDRoute.Models.PaymentType.Cheque:
+                                                <span class="badge bg-info px-2 py-1">
+                                                    <i class="fas fa-money-check me-1"></i>Cheque
+                                                </span>
+                                                break;
+                                            case DSDRoute.Models.PaymentType.Credit:
+                                                <span class="badge bg-warning px-2 py-1">
+                                                    <i class="fas fa-credit-card me-1"></i>Credit
+                                                </span>
+                                                break;
+                                            case DSDRoute.Models.PaymentType.CreditSettlement:
+                                                <span class="badge bg-secondary px-2 py-1">
+                                                    <i class="fas fa-handshake me-1"></i>Settlement
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div>@payment.PaymentDate.ToString("MMM dd, yyyy")</div>
+                                            <small class="text-muted">@payment.PaymentDate.ToString("hh:mm tt")</small>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (payment.IsVerified)
+                                        {
+                                            <span class="badge bg-success px-3 py-2 rounded-pill">
+                                                <i class="fas fa-check-circle me-1"></i>Verified
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning px-3 py-2 rounded-pill">
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            </span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div class="btn-group" role="group">
+                                            <a class="modern-btn modern-btn-primary btn-sm" asp-action="Details" asp-route-id="@payment.Id" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (isAdmin && !payment.IsVerified)
+                                            {
+                                                <form asp-action="Verify" asp-route-id="@payment.Id" method="post" style="display:inline;" 
+                                                      onsubmit="return confirm('Verify this payment?');">
+                                                    <button type="submit" class="modern-btn modern-btn-success btn-sm" title="Verify Payment">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            @if (payment.PaymentType == DSDRoute.Models.PaymentType.Cheque && !string.IsNullOrEmpty(payment.ChequeNumber))
+                                            {
+                                                <button class="modern-btn modern-btn-info btn-sm" title="Cheque: @payment.ChequeNumber">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <i class="fas fa-credit-card" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h4 class="text-muted mb-2">No Payments Found</h4>
+                    <p class="text-muted">Payment records will appear here once orders are delivered and payments are recorded.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple search functionality
+        document.getElementById('paymentSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const paymentId = row.querySelector('td .fw-semibold').textContent.toLowerCase();
+                const shopName = row.querySelectorAll('td')[2].querySelector('.fw-semibold').textContent.toLowerCase();
+                const type = row.querySelectorAll('td')[4].textContent.toLowerCase();
+                if (paymentId.includes(searchTerm) || shopName.includes(searchTerm) || type.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,248 @@
+@model DSDRoute.Models.Shop
+@{
+    ViewData["Title"] = "Shop Details";
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-store me-3"></i>@Model.Name
+            </h1>
+            <p class="text-muted mb-0">Shop details and information</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="modern-btn modern-btn-outline" asp-action="Index">
+                <i class="fas fa-arrow-left me-2"></i>Back to Shops
+            </a>
+            <a class="modern-btn modern-btn-primary" asp-action="Edit" asp-route-id="@Model.Id">
+                <i class="fas fa-edit me-2"></i>Edit Shop
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Shop Information -->
+        <div class="col-lg-8 mb-4">
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Shop Information
+                    </h5>
+                </div>
+                <div class="modern-card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="modern-form-label text-muted">Shop Name</label>
+                            <div class="fw-semibold fs-5">@Model.Name</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="modern-form-label text-muted">Contact Information</label>
+                            <div class="fw-semibold fs-5">@Model.Contact</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="modern-form-label text-muted">Email Address</label>
+                            <div class="fw-semibold fs-5">
+                                @if (!string.IsNullOrEmpty(Model.Email))
+                                {
+                                    <i class="fas fa-envelope me-2 text-primary"></i>@Model.Email
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not provided</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="modern-form-label text-muted">Created By</label>
+                            <div class="fw-semibold fs-5">
+                                <i class="fas fa-user me-2 text-info"></i>@Model.CreatedBy
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="modern-form-label text-muted">Location</label>
+                        <div class="fw-semibold fs-5">
+                            <i class="fas fa-map-marker-alt me-2 text-danger"></i>@Model.Location
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Address))
+                    {
+                        <div class="mb-3">
+                            <label class="modern-form-label text-muted">Additional Address</label>
+                            <div class="fw-semibold fs-5">@Model.Address</div>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="modern-form-label text-muted">Status</label>
+                            <div class="fw-semibold fs-5">
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge bg-success px-3 py-2 rounded-pill">
+                                        <i class="fas fa-check-circle me-1"></i>Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                        <i class="fas fa-times-circle me-1"></i>Inactive
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="modern-form-label text-muted">Created Date</label>
+                            <div class="fw-semibold fs-5">
+                                <i class="fas fa-calendar me-2 text-info"></i>@Model.CreatedDate.ToString("MMM dd, yyyy")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats & Actions -->
+        <div class="col-lg-4 mb-4">
+            <!-- Quick Stats -->
+            <div class="modern-card mb-4">
+                <div class="modern-card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-chart-bar me-2"></i>Shop Statistics
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Total Orders</span>
+                        <span class="fw-bold text-primary">@Model.Orders.Count</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Pending Orders</span>
+                        <span class="fw-bold text-warning">@Model.Orders.Count(o => o.Status == DSDRoute.Models.OrderStatus.Pending)</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Total Returns</span>
+                        <span class="fw-bold text-danger">@Model.Returns.Count</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="modern-card">
+                <div class="modern-card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h6>
+                    <div class="d-grid gap-2">
+                        <a class="modern-btn modern-btn-primary" asp-controller="Order" asp-action="Create" asp-route-shopId="@Model.Id">
+                            <i class="fas fa-plus me-2"></i>Create Order
+                        </a>
+                        <a class="modern-btn modern-btn-success" asp-controller="Order" asp-action="Index" asp-route-shopId="@Model.Id">
+                            <i class="fas fa-list me-2"></i>View Orders
+                        </a>
+                        <a class="modern-btn modern-btn-info" asp-controller="Payment" asp-action="Index" asp-route-shopId="@Model.Id">
+                            <i class="fas fa-credit-card me-2"></i>View Payments
+                        </a>
+                        @if (!Model.IsActive)
+                        {
+                            <form asp-action="Activate" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                <button type="submit" class="modern-btn modern-btn-success w-100" onclick="return confirm('Activate this shop?');">
+                                    <i class="fas fa-play me-2"></i>Activate Shop
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Deactivate" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                <button type="submit" class="modern-btn modern-btn-outline w-100" onclick="return confirm('Deactivate this shop?');">
+                                    <i class="fas fa-pause me-2"></i>Deactivate Shop
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Section -->
+    @if (Model.Orders.Any())
+    {
+        <div class="modern-card">
+            <div class="modern-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart me-2"></i>Recent Orders
+                    </h5>
+                    <a class="modern-btn modern-btn-outline btn-sm" asp-controller="Order" asp-action="Index" asp-route-shopId="@Model.Id">
+                        View All Orders
+                    </a>
+                </div>
+            </div>
+            <div class="modern-card-body p-0">
+                <div class="table-responsive">
+                    <table class="modern-table table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1rem;">Order #</th>
+                                <th style="padding: 1rem;">Date</th>
+                                <th style="padding: 1rem;">Amount</th>
+                                <th style="padding: 1rem;">Status</th>
+                                <th style="padding: 1rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.Orders.OrderByDescending(o => o.OrderDate).Take(5))
+                            {
+                                <tr>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold">#@order.Id</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @order.OrderDate.ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold text-success">Rs. @order.TotalAmount.ToString("0.00")</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @switch (order.Status)
+                                        {
+                                            case DSDRoute.Models.OrderStatus.Pending:
+                                                <span class="badge bg-warning px-2 py-1">Pending</span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Approved:
+                                                <span class="badge bg-info px-2 py-1">Approved</span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.InvoiceGenerated:
+                                                <span class="badge bg-primary px-2 py-1">Invoice Generated</span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Delivered:
+                                                <span class="badge bg-success px-2 py-1">Delivered</span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Cancelled:
+                                                <span class="badge bg-danger px-2 py-1">Cancelled</span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Rejected:
+                                                <span class="badge bg-secondary px-2 py-1">Rejected</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <a class="modern-btn modern-btn-primary btn-sm" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

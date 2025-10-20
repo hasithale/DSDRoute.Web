@@ -1,0 +1,337 @@
+@model DSDRoute.Models.Order
+@{
+    ViewData["Title"] = $"Print Order #{Model.Id}";
+    Layout = null; // No layout for print view
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.2;
+            color: #000;
+            background: white;
+            margin: 0;
+            padding: 5px;
+            width: 58mm;
+            max-width: 58mm;
+        }
+        
+        .receipt-line {
+            border-bottom: 1px solid #000;
+            margin: 2px 0;
+            width: 100%;
+        }
+        
+        .company-info {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .company-name {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 1px 0;
+        }
+        
+        .company-address {
+            font-size: 10px;
+            margin: 1px 0;
+        }
+        
+        .receipt-title {
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            margin: 5px 0;
+            text-transform: uppercase;
+        }
+        
+        .separator {
+            text-align: center;
+            margin: 2px 0;
+            font-weight: bold;
+        }
+        
+        .info-row {
+            margin: 1px 0;
+            font-size: 10px;
+        }
+        
+        .receipt-table {
+            width: 100%;
+            font-size: 9px;
+            margin: 2px 0;
+        }
+        
+        .receipt-table td {
+            padding: 1px 2px;
+            vertical-align: top;
+        }
+        
+        .qty-col { width: 8%; text-align: left; }
+        .item-col { width: 52%; text-align: left; }
+        .price-col { width: 20%; text-align: right; }
+        .total-col { width: 20%; text-align: right; }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-left {
+            text-align: left;
+        }
+        
+        .bold {
+            font-weight: bold;
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 10px;
+        }
+        
+        .total-line {
+            margin: 1px 0;
+            font-size: 10px;
+        }
+        
+        .payment-info {
+            margin: 2px 0;
+            font-size: 10px;
+        }
+        
+        pre {
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            margin: 0;
+            white-space: pre;
+        }
+        
+        .section-title {
+            font-size: 10px;
+            font-weight: bold;
+            margin: 3px 0 1px 0;
+            text-align: center;
+        }
+        
+        /* Print styles for thermal printer */
+        @@media print {
+            body {
+                width: 58mm;
+                margin: 0;
+                padding: 2px;
+                font-size: 9px;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            @@page {
+                size: 58mm auto;
+                margin: 0;
+            }
+        }
+        
+        .no-print {
+            margin: 10px 0;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Print Button (hidden when printing) -->
+    <div class="no-print">
+        <button onclick="window.print()" style="padding: 10px 20px; margin: 5px;">Print Receipt</button>
+        <button onclick="window.close()" style="padding: 10px 20px; margin: 5px;">Close</button>
+    </div>
+
+    <!-- Thermal Receipt Format -->
+    <div class="receipt">
+        @{
+            var subtotal = Model.OrderItems.Sum(oi => oi.Total);
+            var taxAmount = subtotal * (Model.TaxPercentage / 100);
+            var afterTaxTotal = subtotal + taxAmount;
+            var afterDiscountTotal = afterTaxTotal - Model.InvoiceDiscount;
+            var returnsTotal = Model.Returns.Sum(r => r.RefundAmount ?? 0);
+            var paymentsTotal = Model.Payments.Sum(p => p.Amount);
+            
+            // Get previous credit bills amount from the shop
+            var previousCreditAmount = ViewBag.PreviousCreditAmount ?? 0;
+            var returnItemsCredit = returnsTotal;
+            var netTotal = afterDiscountTotal - returnItemsCredit;
+            var outstanding = netTotal - paymentsTotal;
+            
+            var paymentMethod = Model.Payments.Any() ? 
+                (Model.Payments.First().PaymentType == DSDRoute.Models.PaymentType.Cash ? "Cash" :
+                 Model.Payments.First().PaymentType == DSDRoute.Models.PaymentType.Cheque ? "Cheque" : "Credit") : "Credit";
+        }
+        
+        <!-- 1. Business Details Section -->
+        <div class="company-info">
+            <div class="company-name">ABC Distributors (Pvt) Ltd</div>
+            <div class="company-address">123 Main Street, Colombo</div>
+            <div class="company-address">Tel: 077-1234567</div>
+        </div>
+        <div class="receipt-title">SALES INVOICE</div>
+        <!-- 2. Invoice Details Section -->
+        <div class="info-row">Invoice No : INV-@Model.Id.ToString().PadLeft(5, '0')</div>
+        <div>Sales Rep  : @(Model.SalesRep.Email?.Split('@')[0] ?? "N/A")</div>
+        <div class="info-row">Date : @Model.OrderDate.ToString("yyyy-MM-dd") | Time : @Model.OrderDate.ToString("HH:mm")</div>
+                
+        <!-- 3. Shop Details Section -->
+        <div class="info-row">Customer : @Model.Shop.Name</div>
+        <div class="info-row">Address : @Model.Shop.Location</div>
+        @if (!string.IsNullOrEmpty(Model.Shop.Contact))
+        {
+            <div class="info-row">Contact : @Model.Shop.Contact</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.Shop.Email))
+        {
+            <div class="info-row">Email : @Model.Shop.Email</div>
+        }
+        
+        <div class="separator">---------------------------------</div>
+        
+        <!-- 4. Purchased Items Table -->
+        <div class="section-title">PURCHASED ITEMS</div>
+        <table class="receipt-table">
+            <tr>
+                <td class="qty-col bold">Qty</td>
+                <td class="item-col bold">Item</td>
+                <td class="price-col bold">Price</td>
+                <td class="total-col bold">Total</td>
+            </tr>
+        </table>
+        <div class="separator">---------------------------------</div>
+        
+        @foreach (var item in Model.OrderItems)
+        {
+            <table class="receipt-table">
+                <tr>
+                    <td class="qty-col">@item.Quantity.ToString().PadLeft(2)</td>
+                    <td class="item-col">@(item.Product.Name.Length > 13 ? item.Product.Name.Substring(0, 13) : item.Product.Name.PadRight(13))</td>
+                    <td class="price-col">@item.Price.ToString("0.00").PadLeft(7)</td>
+                    <td class="total-col">@item.Total.ToString("0.00").PadLeft(7)</td>
+                </tr>
+            </table>
+        }
+        
+        <div class="separator">---------------------------------</div>
+        
+        <!-- 5. Total Items and Subtotal -->
+        <div class="info-row">Total Items: @Model.OrderItems.Sum(oi => oi.Quantity)</div>
+        <div class="info-row">Subtotal   : Rs. @subtotal.ToString("0.00")</div>
+        
+        <div class="separator">---------------------------------</div>
+        
+        <!-- 6. Returned Item Details Table (only if any) -->
+        @if (Model.Returns.Any())
+        {
+            <div class="section-title">RETURNED ITEMS</div>
+            <table class="receipt-table">
+                <tr>
+                    <td class="qty-col bold">Qty</td>
+                    <td class="item-col bold">Item</td>
+                    <td class="item-col bold">Reason</td>
+                    <td class="total-col bold">Amount</td>
+                </tr>
+            </table>
+            <div class="separator">---------------------------------</div>
+            
+            @foreach (var returnItem in Model.Returns)
+            {
+                <table class="receipt-table">
+                    <tr>
+                        <td class="qty-col">@returnItem.Quantity.ToString().PadLeft(2)</td>
+                        <td class="item-col">@(returnItem.Product.Name.Length > 9 ? returnItem.Product.Name.Substring(0, 9) : returnItem.Product.Name.PadRight(9))</td>
+                        <td class="item-col">@(returnItem.Reason.Length > 7 ? returnItem.Reason.Substring(0, 7) : returnItem.Reason.PadRight(7))</td>
+                        <td class="total-col">@(returnItem.RefundAmount?.ToString("0.00") ?? "0.00")</td>
+                    </tr>
+                </table>
+            }
+            
+            <div class="separator">---------------------------------</div>
+            <div class="info-row">Total Returned: Rs. @returnsTotal.ToString("0.00")</div>
+        }
+        
+        <!-- 7. Additional Information Section -->
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <div class="info-row">Notes      : @Model.Notes</div>
+        }
+        @if (Model.TaxPercentage > 0)
+        {
+            <div class="info-row">Tax/VAT %  : @Model.TaxPercentage.ToString("0.00")%</div>
+        }
+        @if (Model.DeliveryDate.HasValue)
+        {
+            <div class="info-row">Delivery   : @Model.DeliveryDate.Value.ToString("yyyy-MM-dd")</div>
+        }
+        
+        <!-- 8. Payment Details Section -->
+        
+        @if (Model.InvoiceDiscount > 0)
+        {
+            <div class="info-row">Invoice Disc : Rs. @Model.InvoiceDiscount.ToString("0.00")</div>
+        }
+        
+        @if (Model.TaxPercentage > 0)
+        {
+            <div class="info-row">Tax Amount   : Rs. @taxAmount.ToString("0.00")</div>
+        }
+        
+        @if (previousCreditAmount > 0)
+        {
+            <div class="info-row">Prev Credit  : Rs. @previousCreditAmount.ToString("0.00")</div>
+        }
+        
+        @* @if (returnItemsCredit > 0)
+        {
+            <div class="info-row">Return Credit: Rs. @returnItemsCredit.ToString("0.00")</div>
+        } *@
+        
+        <div class="info-row bold">Net Total    : Rs. @netTotal.ToString("0.00")</div>
+        <div class="info-row">Today Payment: Rs. @paymentsTotal.ToString("0.00")</div>
+        <div class="info-row">Payment Mode : @paymentMethod</div>
+        <div class="info-row bold">Outstanding  : Rs. @outstanding.ToString("0.00")</div>
+        
+        <div class="separator">---------------------------------</div>
+        
+        <!-- 9. Thank You Section -->
+        <div class="receipt-footer bold">THANK YOU FOR YOUR BUSINESS!</div>
+        
+        <div style="text-align: center; font-size: 9px; margin-top: 3px;">
+            <div>Powered by DSDRoute System</div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-print when page loads (optional)
+        // window.onload = function() { window.print(); }
+        
+        // Print function
+        function printPage() {
+            window.print();
+        }
+        
+        // Close function
+        function closePage() {
+            window.close();
+        }
+    </script>
+</body>
+</html>

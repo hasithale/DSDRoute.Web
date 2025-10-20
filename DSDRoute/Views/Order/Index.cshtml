@@ -1,0 +1,358 @@
+@model IEnumerable<DSDRoute.Models.Order>
+@{
+    ViewData["Title"] = "Order Management";
+    var canViewAll = ViewBag.CanViewAll ?? false;
+    var canCreate = ViewBag.CanCreate ?? false;
+    var canEdit = ViewBag.CanEdit ?? false;
+    var canDelete = ViewBag.CanDelete ?? false;
+}
+
+<div class="fade-in-up">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-gradient fw-bold mb-1">
+                <i class="fas fa-shopping-cart me-3"></i>Order Management
+            </h1>
+            <p class="text-muted mb-0">Track and manage customer orders</p>
+        </div>
+        @if (canCreate)
+        {
+            <a class="modern-btn modern-btn-success" asp-action="Create">
+                <i class="fas fa-plus me-2"></i>Create New Order
+            </a>
+        }
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #667eea;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold text-gradient mb-1">@Model.Count()</h3>
+                            <p class="text-muted mb-0">Total Orders</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(102, 126, 234, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-shopping-cart" style="color: #667eea; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #f093fb;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #f093fb;">@Model.Count(o => o.Status == DSDRoute.Models.OrderStatus.Pending)</h3>
+                            <p class="text-muted mb-0">Pending Orders</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(240, 147, 251, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-clock" style="color: #f093fb; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #4facfe;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #4facfe;">@Model.Count(o => o.Status == DSDRoute.Models.OrderStatus.Delivered)</h3>
+                            <p class="text-muted mb-0">Delivered</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(75, 172, 254, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check-circle" style="color: #4facfe; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="modern-card" style="border-left: 4px solid #28a745;">
+                <div class="modern-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #28a745;">Rs. @Model.Sum(o => o.TotalAmount).ToString("0.00")</h3>
+                            <p class="text-muted mb-0">Total Value</p>
+                        </div>
+                        <div style="width: 50px; height: 50px; background: rgba(40, 167, 69, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-dollar-sign" style="color: #28a745; font-size: 1.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h5 class="mb-3 mb-md-0">
+                    <i class="fas fa-list me-2"></i>Order History
+                </h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <!-- Date Filters -->
+                    <div class="input-group" style="width: 180px;">
+                        <span class="input-group-text" style="background: #f8fafc; border-right: none;">
+                            <i class="fas fa-calendar-alt text-muted"></i>
+                        </span>
+                        <input type="date" class="form-control modern-form-control" 
+                               placeholder="Start Date" id="startDate" 
+                               value="@ViewBag.StartDate"
+                               style="border-left: none;">
+                    </div>
+                    <div class="input-group" style="width: 180px;">
+                        <span class="input-group-text" style="background: #f8fafc; border-right: none;">
+                            <i class="fas fa-calendar-alt text-muted"></i>
+                        </span>
+                        <input type="date" class="form-control modern-form-control" 
+                               placeholder="End Date" id="endDate" 
+                               value="@ViewBag.EndDate"
+                               style="border-left: none;">
+                    </div>
+                    <button class="modern-btn modern-btn-primary" type="button" id="filterBtn">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                    <button class="modern-btn modern-btn-outline" type="button" id="clearFilterBtn">
+                        <i class="fas fa-times me-1"></i>Clear
+                    </button>
+                    <!-- Search -->
+                    <div class="input-group" style="width: 250px;">
+                        <input type="text" class="form-control modern-form-control" placeholder="Search orders..." id="orderSearch">
+                        <button class="modern-btn modern-btn-outline" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modern-card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="modern-table table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1.5rem 1rem;">Order #</th>
+                                <th style="padding: 1.5rem 1rem;">Shop</th>
+                                @if (canViewAll)
+                                {
+                                    <th style="padding: 1.5rem 1rem;">Sales Rep</th>
+                                }
+                                <th style="padding: 1.5rem 1rem;">Date</th>
+                                <th style="padding: 1.5rem 1rem;">Amount</th>
+                                <th style="padding: 1.5rem 1rem;">Status</th>
+                                <th style="padding: 1.5rem 1rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold">#@order.Id</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div class="fw-semibold">@order.Shop.Name</div>
+                                            <small class="text-muted">@order.Shop.Location</small>
+                                        </div>
+                                    </td>
+                                    @if (canViewAll)
+                                    {
+                                        <td style="padding: 1rem;">@order.SalesRep.Email</td>
+                                    }
+                                    <td style="padding: 1rem;">
+                                        <div>
+                                            <div>@order.OrderDate.ToString("MMM dd, yyyy")</div>
+                                            <small class="text-muted">@order.OrderDate.ToString("hh:mm tt")</small>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <span class="fw-semibold text-success">Rs. @order.TotalAmount.ToString("0.00")</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @switch (order.Status)
+                                        {
+                                            case DSDRoute.Models.OrderStatus.Pending:
+                                                <span class="badge bg-warning px-3 py-2 rounded-pill">
+                                                    <i class="fas fa-clock me-1"></i>Pending
+                                                </span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Approved:
+                                                <span class="badge bg-info px-3 py-2 rounded-pill">
+                                                    <i class="fas fa-thumbs-up me-1"></i>Approved
+                                                </span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Delivered:
+                                                <span class="badge bg-success px-3 py-2 rounded-pill">
+                                                    <i class="fas fa-check-circle me-1"></i>Delivered
+                                                </span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Cancelled:
+                                                <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                                    <i class="fas fa-times-circle me-1"></i>Cancelled
+                                                </span>
+                                                break;
+                                            case DSDRoute.Models.OrderStatus.Rejected:
+                                                <span class="badge bg-secondary px-3 py-2 rounded-pill">
+                                                    <i class="fas fa-ban me-1"></i>Rejected
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-light text-dark px-3 py-2 rounded-pill">@order.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        <div class="btn-group" role="group">
+                                            <a class="modern-btn modern-btn-primary btn-sm" asp-action="Details" asp-route-id="@order.Id" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a class="modern-btn modern-btn-secondary btn-sm" asp-action="Print" asp-route-id="@order.Id" target="_blank" title="Print Order">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            @if (canEdit && order.Status == DSDRoute.Models.OrderStatus.Pending)
+                                            {
+                                                <form asp-action="Approve" asp-route-id="@order.Id" method="post" style="display:inline;" 
+                                                      onsubmit="return confirm('Approve this order?');">
+                                                    <button type="submit" class="modern-btn modern-btn-success btn-sm" title="Approve Order">
+                                                        <i class="fas fa-thumbs-up"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            @if (order.Status == DSDRoute.Models.OrderStatus.Approved)
+                                            {
+                                                <form asp-action="MarkDelivered" asp-route-id="@order.Id" method="post" style="display:inline;" 
+                                                      onsubmit="return confirm('Mark this order as delivered?');">
+                                                    <button type="submit" class="modern-btn modern-btn-info btn-sm" title="Mark as Delivered">
+                                                        <i class="fas fa-truck"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <i class="fas fa-shopping-cart" style="font-size: 2rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h4 class="text-muted mb-2">No Orders Found</h4>
+                    <p class="text-muted">Orders will appear here once they are created.</p>
+                    @if (User.IsInRole("Admin") || User.IsInRole("SalesRep"))
+                    {
+                        <a class="modern-btn modern-btn-success" asp-action="Create">
+                            <i class="fas fa-plus me-2"></i>Create First Order
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Print All Orders Button -->
+    @if (Model.Any())
+    {
+        <div class="text-center mt-4">
+            <a class="modern-btn modern-btn-outline-primary" id="printAllOrdersBtn" target="_blank">
+                <i class="fas fa-print me-2"></i>Print All Orders (@Model.Count())
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Date filter functionality
+        document.getElementById('filterBtn').addEventListener('click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let url = '@Url.Action("Index", "Order")';
+            const params = new URLSearchParams();
+            
+            if (startDate) {
+                params.append('startDate', startDate);
+            }
+            if (endDate) {
+                params.append('endDate', endDate);
+            }
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+            
+            window.location.href = url;
+        });
+
+        // Clear filter functionality
+        document.getElementById('clearFilterBtn').addEventListener('click', function() {
+            window.location.href = '@Url.Action("Index", "Order")';
+        });
+
+        // Allow filtering by pressing Enter in date inputs
+        document.getElementById('startDate').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('filterBtn').click();
+            }
+        });
+
+        document.getElementById('endDate').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('filterBtn').click();
+            }
+        });
+
+        // Print All Orders button - pass date filters
+        document.getElementById('printAllOrdersBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let url = '@Url.Action("PrintAll", "Order")';
+            const params = new URLSearchParams();
+            
+            if (startDate) {
+                params.append('startDate', startDate);
+            }
+            if (endDate) {
+                params.append('endDate', endDate);
+            }
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+            
+            window.open(url, '_blank');
+        });
+
+        // Simple search functionality
+        document.getElementById('orderSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const orderId = row.querySelector('td .fw-semibold').textContent.toLowerCase();
+                const shopName = row.querySelectorAll('td')[1].querySelector('.fw-semibold').textContent.toLowerCase();
+                const status = row.querySelectorAll('td')[@(canViewAll ? "5" : "4")].textContent.toLowerCase();
+                if (orderId.includes(searchTerm) || shopName.includes(searchTerm) || status.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}
