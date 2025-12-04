@@ -57,6 +57,18 @@ namespace DSDRoute.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            // Check if user is authenticated
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return RedirectToAction("Login");
+            }
+            
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> Logout()
         {

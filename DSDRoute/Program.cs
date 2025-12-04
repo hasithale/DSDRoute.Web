@@ -5,12 +5,24 @@ using DSDRoute.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptionsAction: sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+            sqlOptions.CommandTimeout(60); // 60 seconds timeout
+        });
+});
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -34,9 +46,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
     options.SlidingExpiration = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.ExpireTimeSpan = TimeSpan.FromHours(8); // Increased from 30 minutes to 8 hours
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
 builder.Services.AddControllersWithViews();
@@ -67,14 +81,16 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-
 
 app.MapStaticAssets();
 
@@ -85,19 +101,55 @@ app.MapControllerRoute(
 
 app.MapHub<OrderHub>("/orderHub");
 
-// Seed data
+// Seed data with error handling
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    
     try
     {
-        await SeedData.InitializeAsync(services);
+        logger.LogInformation("Attempting to connect to database and seed data...");
+        
+        // Test database connection
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var canConnect = await context.Database.CanConnectAsync();
+        
+        if (!canConnect)
+        {
+            logger.LogError("Cannot connect to the database. Please check your connection string in appsettings.json");
+            logger.LogError("Connection String: {ConnectionString}", 
+                builder.Configuration.GetConnectionString("DefaultConnection")?.Replace("Password=Hazz@119", "Password=***"));
+        }
+        else
+        {
+            logger.LogInformation("Database connection successful!");
+            
+            // Apply pending migrations
+            logger.LogInformation("Applying pending migrations...");
+            await context.Database.MigrateAsync();
+            
+            // Seed initial data
+            logger.LogInformation("Seeding initial data...");
+            await SeedData.InitializeAsync(services);
+            logger.LogInformation("Data seeding completed successfully!");
+        }
+    }
+    catch (SqlException sqlEx)
+    {
+        logger.LogError(sqlEx, "SQL Server connection error occurred. Details: {Message}", sqlEx.Message);
+        logger.LogError("Please verify:");
+        logger.LogError("1. Database server is running and accessible");
+        logger.LogError("2. Connection string is correct");
+        logger.LogError("3. Firewall allows connections to the database server");
+        logger.LogError("4. Network connectivity to: mssql-204152-0.cloudclusters.net:10061");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the DB.");
+        logger.LogError(ex, "An error occurred during database initialization: {Message}", ex.Message);
     }
+    
+    logger.LogInformation("Application starting...");
 }
 
 app.Run();

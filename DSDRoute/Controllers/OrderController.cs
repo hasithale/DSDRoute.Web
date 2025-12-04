@@ -19,26 +19,42 @@ namespace DSDRoute.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IHubContext<OrderHub> _hubContext;
 
-        public OrderController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IHubContext<OrderHub> hubContext)
+        public OrderController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IHubContext<OrderHub> hubContext)
         {
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
             _hubContext = hubContext;
         }
 
         public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null) return Challenge();
+            if (currentUser == null)
+            {
+                // User is not properly authenticated, redirect to login
+                return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Index", "Order") });
+            }
+            
+            // Check if user is active
+            if (!currentUser.IsActive)
+            {
+                TempData["Error"] = "Your account is inactive. Please contact the administrator.";
+                await _signInManager.SignOutAsync();
+                return RedirectToAction("Login", "Account");
+            }
             
             var canViewAll = await _userManager.HasPermissionAsync(currentUser, Permissions.Orders_ViewAll);
             var canViewOwn = await _userManager.HasPermissionAsync(currentUser, Permissions.Orders_ViewOwn);
 
             if (!canViewAll && !canViewOwn)
             {
-                return Forbid();
+                // User doesn't have permission to view orders
+                TempData["Error"] = "You don't have permission to view orders. Please contact your administrator.";
+                return RedirectToAction("AccessDenied", "Account");
             }
 
             IQueryable<Order> ordersQuery = _context.Orders
@@ -112,9 +128,6 @@ namespace DSDRoute.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
-
-            var shops = await _context.Shops.Where(s => s.IsActive).OrderBy(s => s.Name).ToListAsync();
-            var products = await _context.Products.Where(p => p.IsActive).OrderBy(p => p.Name).ToListAsync();
             
             var salesRepName = "Unknown";
             if (!string.IsNullOrEmpty(currentUser.Email))
@@ -131,10 +144,22 @@ namespace DSDRoute.Controllers
                 SalesRepId = currentUser.Id,
                 SalesRepName = salesRepName,
                 OrderNumber = await GenerateOrderNumber(),
-                OrderTime = DateTime.Now.TimeOfDay, // Set current time when form loads
-                Shops = new SelectList(shops, "Id", "Name"),
-                Products = new SelectList(products, "Id", "Name")
+                OrderTime = DateTime.Now.TimeOfDay // Set current time when form loads
             };
+            
+            // Populate dropdown lists for shops and products
+            var shops = await _context.Shops
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+            
+            var products = await _context.Products
+                .Where(p => p.IsActive)
+                .OrderBy(p => p.Name)
+                .ToListAsync();
+
+            viewModel.Shops = new SelectList(shops, "Id", "Name");
+            viewModel.Products = new SelectList(products, "Id", "Name");
             
             return View(viewModel);
         }
